@@ -24,7 +24,7 @@ impl Parser {
         None
     }
 
-    fn parse_c_instruction(&self, line: String) -> Result<Instruction> {
+    fn parse_c_instruction(&self, line: &str) -> Result<Instruction> {
         let mut chars = line.chars();
 
         let mut passed_string = String::new();
@@ -58,6 +58,7 @@ impl Parser {
 
     fn parse(&mut self) -> Option<Instruction> {
         if let Some(line) = self.read_next_line() {
+            let line = line.trim();
             if line.starts_with('@') {
                 Some(Instruction::AInst(line[1..].to_string()))
             } else if line.starts_with('(') {
@@ -166,6 +167,19 @@ mod tests {
                 dest: None,
                 comp: "M".to_string(),
                 jump: Some("JGT".to_string()),
+            })
+        );
+    }
+
+    #[test]
+    fn test_ignore_whitespace() {
+        let mut parser = Parser::new("    D=M");
+        assert_eq!(
+            parser.next(),
+            Some(Instruction::CInst {
+                dest: Some("D".to_string()),
+                comp: "M".to_string(),
+                jump: None,
             })
         );
     }
